@@ -1,0 +1,30 @@
+# Next.js
+.next/
+out/
+node_modules/
+next-env.d.ts
+
+# Env
+.env
+.env.local
+.env*.local
+backend/.env
+
+# Python
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.venv/
+backend/venv/
+
+# Prisma generated client
+backend/**/prisma_generated/
+
+# Misc
+.DS_Store
+*.log
+
+# TypeScript
+*.tsbuildinfo
+
+# Claude Code (config local)
+.claude/settings.local.json
