@@ -13,8 +13,10 @@ export function Footer() {
           <p className="mt-3">Avenida das Esmeraldas, 820, sala 407</p>
           <p>Centro Empresarial Villas Boas, Marília, SP</p>
         </div>
-        <p className="text-xs text-navy-300">© {new Date().getFullYear()} Dynamus Capital. Todos os direitos reservados.</p>
-        <p className="text-xs text-navy-300">Desenvolvido por <a href="https://noxi-virid.vercel.app/" className="font-bold hover:underline">Noxi</a></p>
+        <div className="flex flex-col gap-1">
+          <p className="text-xs text-navy-300">© {new Date().getFullYear()} Dynamus Capital. Todos os direitos reservados.</p>
+          <p className="text-xs text-navy-300 items-end">Desenvolvido por <a href="https://noxi-virid.vercel.app/" className="font-bold hover:underline">Noxi</a></p>
+        </div>
       </div>
     </footer>
   );
