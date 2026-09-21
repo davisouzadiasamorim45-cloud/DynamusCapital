@@ -7,6 +7,7 @@ import { StepIdentificacao } from "./steps/StepIdentificacao";
 import { StepTipoSeguro } from "./steps/StepTipoSeguro";
 import { StepEndereco } from "./steps/StepEndereco";
 import { StepContato } from "./steps/StepContato";
+import { ConfirmationScreen } from "./ConfirmationScreen";
 import { detalhesSeguroValidos, emptyWizardData, tipoSeguroGrupo, type TipoSeguro, type WizardData } from "@/lib/types";
 import { isValidCep, isValidDocumento, isValidEmail, isValidCelular, onlyDigits } from "@/lib/validators";
 import { api, ApiError } from "@/lib/api";
@@ -34,13 +35,20 @@ const STEP_CONTENT = [
 ];
 
 export function WizardForm({ initialTipo }: { initialTipo?: TipoSeguro } = {}) {
+  const initialData = (): WizardData => (initialTipo ? { ...emptyWizardData, tipoSeguro: initialTipo } : emptyWizardData);
+
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<WizardData>(() =>
-    initialTipo ? { ...emptyWizardData, tipoSeguro: initialTipo } : emptyWizardData
-  );
+  const [data, setData] = useState<WizardData>(initialData);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [done, setDone] = useState(false);
+
+  function handleReset() {
+    setData(initialData());
+    setStep(0);
+    setSubmitError("");
+    setDone(false);
+  }
 
   function patch(update: Partial<WizardData>) {
     setData((prev) => ({ ...prev, ...update }));
@@ -110,17 +118,7 @@ export function WizardForm({ initialTipo }: { initialTipo?: TipoSeguro } = {}) {
   }
 
   if (done) {
-    return (
-      <div className="mx-auto w-full max-w-xl py-24">
-        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full border border-gold-400 text-lg text-gold-600">
-          ✓
-        </div>
-        <h2 className="text-4xl font-semibold tracking-tight text-navy-950">Cotação solicitada</h2>
-        <p className="mt-3 text-lg text-slate-500">
-          Recebemos seus dados. Nossa equipe vai entrar em contato em breve com sua cotação personalizada.
-        </p>
-      </div>
-    );
+    return <ConfirmationScreen data={data} onReset={handleReset} />;
   }
 
   const content = STEP_CONTENT[step];
