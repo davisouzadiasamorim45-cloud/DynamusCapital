@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Field } from "@/components/ui/Field";
 import { api } from "@/lib/api";
 import { isValidCep } from "@/lib/validators";
-import { maskCep } from "@/lib/masks";
+import { maskCep, maskUf } from "@/lib/masks";
 import type { WizardData } from "@/lib/types";
 
 interface Props {
@@ -29,6 +29,8 @@ export function StepEndereco({ data, onChange }: Props) {
       onChange({
         rua: result.rua || data.rua,
         bairro: result.bairro || data.bairro,
+        cidade: result.cidade || data.cidade,
+        uf: result.uf || data.uf,
       });
     } catch {
       setCepError("CEP não encontrado, preencha manualmente");
@@ -49,11 +51,13 @@ export function StepEndereco({ data, onChange }: Props) {
         error={cepError}
         hint={loading ? "Buscando endereço..." : undefined}
         inputMode="numeric"
+        autoComplete="postal-code"
         wrapperClassName="sm:col-span-2"
       />
       <Field
         label="Rua"
         name="rua"
+        autoComplete="address-line1"
         value={data.rua}
         onChange={(e) => onChange({ rua: e.target.value })}
         wrapperClassName="sm:col-span-4"
@@ -77,6 +81,24 @@ export function StepEndereco({ data, onChange }: Props) {
         name="bairro"
         value={data.bairro}
         onChange={(e) => onChange({ bairro: e.target.value })}
+        wrapperClassName="sm:col-span-2"
+      />
+      <Field
+        label="Cidade"
+        name="cidade"
+        autoComplete="address-level2"
+        value={data.cidade}
+        onChange={(e) => onChange({ cidade: e.target.value })}
+        wrapperClassName="sm:col-span-4"
+      />
+      <Field
+        label="Estado (UF)"
+        name="uf"
+        placeholder="SP"
+        // Desligado: o navegador preencheria o nome do estado ("São Paulo") e o maskUf o estragaria.
+        autoComplete="off"
+        value={data.uf}
+        onChange={(e) => onChange({ uf: maskUf(e.target.value) })}
         wrapperClassName="sm:col-span-2"
       />
     </div>

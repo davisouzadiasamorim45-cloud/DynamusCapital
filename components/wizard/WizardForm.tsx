@@ -7,21 +7,24 @@ import { StepIdentificacao } from "./steps/StepIdentificacao";
 import { StepTipoSeguro } from "./steps/StepTipoSeguro";
 import { StepEndereco } from "./steps/StepEndereco";
 import { StepContato } from "./steps/StepContato";
-import { emptyWizardData, tipoSeguroGrupo, type TipoSeguro, type WizardData } from "@/lib/types";
-import { isValidCep, isValidCpf, isValidEmail, isValidCelular, onlyDigits } from "@/lib/validators";
+import { detalhesSeguroValidos, emptyWizardData, tipoSeguroGrupo, type TipoSeguro, type WizardData } from "@/lib/types";
+import { isValidCep, isValidDocumento, isValidEmail, isValidCelular, onlyDigits } from "@/lib/validators";
 import { api, ApiError } from "@/lib/api";
+
+// Tipos de seguro que têm o campo livre de observações.
+const OBSERVACOES_TIPOS: TipoSeguro[] = ["EVENTOS", "EMPRESARIAL", "RESPONSABILIDADE_CIVIL"];
 
 const STEP_CONTENT = [
   {
     headline: "Vamos começar com você",
-    subtext: "Informe seu CPF para agilizarmos o preenchimento automaticamente.",
+    subtext: "Informe seu CPF ou CNPJ para agilizarmos o preenchimento automaticamente.",
   },
   {
     headline: "Qual seguro você procura?",
     subtext: "Selecione o tipo de cobertura e conte um pouco mais para nós.",
   },
   {
-    headline: "Onde você mora?",
+    headline: "Endereço:",
     subtext: "Use seu CEP para preenchermos o endereço automaticamente.",
   },
   {
@@ -46,19 +49,19 @@ export function WizardForm({ initialTipo }: { initialTipo?: TipoSeguro } = {}) {
   function canContinue(): boolean {
     switch (step) {
       case 0:
-        return isValidCpf(data.cpf) && data.nome.trim().length > 1 && !!data.dataNascimento;
-      case 1: {
-        const grupo = tipoSeguroGrupo(data.tipoSeguro);
-        if (grupo === "veiculo") return data.placa.trim().length >= 7;
-        if (grupo === "vida") return data.numeroDependentes.trim().length > 0;
-        return !!grupo;
-      }
+        return (
+          isValidDocumento(data.tipoPessoa, data.documento) && data.nome.trim().length > 1 && !!data.dataNascimento
+        );
+      case 1:
+        return detalhesSeguroValidos(data);
       case 2:
         return (
           isValidCep(data.cep) &&
           data.rua.trim().length > 1 &&
           data.numero.trim().length > 0 &&
-          data.bairro.trim().length > 1
+          data.bairro.trim().length > 1 &&
+          data.cidade.trim().length > 1 &&
+          data.uf.length === 2
         );
       case 3:
         return isValidEmail(data.email) && isValidCelular(data.celular) && data.aceitaLgpd;
@@ -71,23 +74,29 @@ export function WizardForm({ initialTipo }: { initialTipo?: TipoSeguro } = {}) {
     setSubmitting(true);
     setSubmitError("");
     try {
-      const grupo = tipoSeguroGrupo(data.tipoSeguro);
+      const tipo = data.tipoSeguro as TipoSeguro;
+      const isVeiculo = tipoSeguroGrupo(tipo) === "veiculo";
       await api.createLead({
-        cpf: onlyDigits(data.cpf),
+        tipoPessoa: data.tipoPessoa,
+        documento: onlyDigits(data.documento),
         nome: data.nome,
         dataNascimento: data.dataNascimento,
-        tipoSeguro: data.tipoSeguro as TipoSeguro,
-        placa: grupo === "veiculo" ? onlyDigits(data.placa) || data.placa : undefined,
-        modeloVeiculo: grupo === "veiculo" ? data.modeloVeiculo : undefined,
-        anoVeiculo: grupo === "veiculo" ? data.anoVeiculo : undefined,
-        numeroDependentes: grupo === "vida" ? Number(data.numeroDependentes) : undefined,
-        valorCarga: grupo === "carga" ? data.valorCarga : undefined,
-        observacoes: grupo === "outros" ? data.observacoes || undefined : undefined,
+        tipoSeguro: tipo,
+        placa: isVeiculo ? data.placa : undefined,
+        modeloVeiculo: isVeiculo ? data.modeloVeiculo || undefined : undefined,
+        anoVeiculo: isVeiculo ? data.anoVeiculo || undefined : undefined,
+        numeroDependentes: tipo === "VIDA_EMPRESARIAL" ? Number(data.numeroDependentes) : undefined,
+        valorCobertura: tipo === "VIDA" || tipo === "RESIDENCIAL" ? data.valorCobertura : undefined,
+        profissao: tipo === "RC_PROFISSIONAL" ? data.profissao.trim() : undefined,
+        valorRisco: tipo === "RC_PROFISSIONAL" ? data.valorRisco || undefined : undefined,
+        observacoes: OBSERVACOES_TIPOS.includes(tipo) ? data.observacoes || undefined : undefined,
         cep: onlyDigits(data.cep),
         rua: data.rua,
         numero: data.numero,
         complemento: data.complemento || undefined,
         bairro: data.bairro,
+        cidade: data.cidade,
+        uf: data.uf,
         email: data.email,
         celular: onlyDigits(data.celular),
         origem: "instagram_campanha",

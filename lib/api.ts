@@ -1,6 +1,11 @@
-import type { Lead, LeadPayload } from "./types";
+import type { Lead, LeadPayload, StatusLead } from "./types";
+import { mockCreateLead, mockListLeads, mockUpdateLeadStatus } from "./mockLeads";
+import { mockLookupCep, mockLookupCnpj } from "./mockLookup";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+// Painel admin com dados fictícios e sem login, para desenvolver antes do backend.
+export const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 export class ApiError extends Error {
   status: number;
@@ -40,26 +45,35 @@ function authHeaders(): Record<string, string> {
 
 export const api = {
   lookupCep: (cep: string) =>
-    request<{ cep: string; rua: string; bairro: string; cidade: string; uf: string }>(`/lookup/cep/${cep}`),
+    USE_MOCK
+      ? mockLookupCep(cep)
+      : request<{ cep: string; rua: string; bairro: string; cidade: string; uf: string }>(`/lookup/cep/${cep}`),
   lookupPlaca: (placa: string) =>
     request<{ placa: string; modelo: string; ano: string; aviso?: string }>(`/lookup/placa/${placa}`),
   lookupCpf: (cpf: string) =>
     request<{ cpf: string; nome: string; data_nascimento: string; aviso?: string }>(`/lookup/cpf/${cpf}`),
+  lookupCnpj: (cnpj: string) =>
+    USE_MOCK
+      ? mockLookupCnpj(cnpj)
+      : request<{ cnpj: string; nome: string; data_abertura: string }>(`/lookup/cnpj/${cnpj}`),
   createLead: (payload: LeadPayload) =>
-    request<Lead>("/leads", { method: "POST", body: JSON.stringify(payload) }),
+    USE_MOCK ? mockCreateLead(payload) : request<Lead>("/leads", { method: "POST", body: JSON.stringify(payload) }),
   adminLogin: (email: string, senha: string) =>
     request<{ access_token: string; nome: string; email: string }>("/admin/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, senha }),
     }),
   listLeads: (params: Record<string, string>) => {
+    if (USE_MOCK) return mockListLeads(params);
     const query = new URLSearchParams(params).toString();
     return request<Lead[]>(`/admin/leads${query ? `?${query}` : ""}`, { headers: authHeaders() });
   },
-  updateLeadStatus: (id: string, status: string) =>
-    request<Lead>(`/admin/leads/${id}`, {
+  updateLeadStatus: (id: string, status: StatusLead) => {
+    if (USE_MOCK) return mockUpdateLeadStatus(id, status);
+    return request<Lead>(`/admin/leads/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
       headers: authHeaders(),
-    }),
+    });
+  },
 };

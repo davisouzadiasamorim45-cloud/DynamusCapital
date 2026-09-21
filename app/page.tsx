@@ -120,7 +120,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-2xl font-light leading-relaxed text-navy-100 sm:text-3xl">
             <span className="font-semibold text-white">Somos uma corretora independente sediada em Marília, SP</span>{" "}
-            que trabalha para você, não para uma seguradora: comparamos as condições entre diversas seguradoras
+            que trabalha para você: comparamos as condições entre diversas seguradoras
             parceiras para encontrar a cobertura certa pelo preço certo, sem enrolação e sem custo extra para você.
           </p>
         </div>

@@ -17,6 +17,7 @@ export function StepContato({ data, onChange }: Props) {
         name="email"
         type="email"
         placeholder="voce@email.com"
+        autoComplete="email"
         value={data.email}
         onChange={(e) => onChange({ email: e.target.value })}
       />
@@ -27,6 +28,8 @@ export function StepContato({ data, onChange }: Props) {
         value={maskCelular(data.celular)}
         onChange={(e) => onChange({ celular: e.target.value })}
         inputMode="tel"
+        // tel-national vem sem o +55; com "tel" o maskCelular pegaria o código do país como DDD.
+        autoComplete="tel-national"
       />
       <label className="flex items-start gap-3 text-sm text-slate-600 sm:col-span-2">
         <input

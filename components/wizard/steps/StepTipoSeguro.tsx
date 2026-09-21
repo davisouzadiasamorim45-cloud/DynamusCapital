@@ -1,17 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import clsx from "clsx";
 import { Field } from "@/components/ui/Field";
+import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { api } from "@/lib/api";
-import { maskPlaca } from "@/lib/masks";
-import { TIPO_SEGURO_OPTIONS, tipoSeguroGrupo, type WizardData } from "@/lib/types";
+import { maskMoeda, maskPlaca } from "@/lib/masks";
+import {
+  TIPO_SEGURO_GRUPO_LABELS,
+  TIPO_SEGURO_OPTIONS,
+  tipoSeguroGrupo,
+  type TipoSeguro,
+  type TipoSeguroGrupo,
+  type WizardData,
+} from "@/lib/types";
 
 interface Props {
   data: WizardData;
   onChange: (patch: Partial<WizardData>) => void;
 }
+
+const GRUPOS: TipoSeguroGrupo[] = ["veiculo", "vida", "outros"];
 
 export function StepTipoSeguro({ data, onChange }: Props) {
   const [loading, setLoading] = useState(false);
@@ -35,23 +44,25 @@ export function StepTipoSeguro({ data, onChange }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap gap-2 sm:gap-2.5">
-        {TIPO_SEGURO_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => onChange({ tipoSeguro: opt.value })}
-            className={clsx(
-              "rounded-full border px-4 py-1.5 text-sm sm:py-2 font-medium transition",
-              data.tipoSeguro === opt.value
-                ? "border-navy-900 bg-navy-900 text-white"
-                : "border-slate-200 text-slate-600 hover:border-slate-400"
-            )}
-          >
-            {opt.label}
-          </button>
+      <Select
+        label="Tipo de seguro"
+        name="tipoSeguro"
+        value={data.tipoSeguro}
+        onChange={(e) => onChange({ tipoSeguro: e.target.value as TipoSeguro })}
+      >
+        <option value="" disabled>
+          Selecione o tipo de seguro
+        </option>
+        {GRUPOS.map((g) => (
+          <optgroup key={g} label={TIPO_SEGURO_GRUPO_LABELS[g]}>
+            {TIPO_SEGURO_OPTIONS.filter((o) => o.grupo === g).map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </optgroup>
         ))}
-      </div>
+      </Select>
 
       {grupo === "veiculo" && (
         <div className="grid gap-x-6 gap-y-5 grid-cols-2 sm:grid-cols-3">
@@ -83,19 +94,20 @@ export function StepTipoSeguro({ data, onChange }: Props) {
         </div>
       )}
 
-      {grupo === "carga" && (
+      {(data.tipoSeguro === "VIDA" || data.tipoSeguro === "RESIDENCIAL") && (
         <Field
-          label="Valor estimado da carga"
-          name="valorCarga"
+          label="Valor de cobertura"
+          name="valorCobertura"
           placeholder="R$ 0,00"
-          value={data.valorCarga}
-          onChange={(e) => onChange({ valorCarga: e.target.value })}
+          value={data.valorCobertura}
+          onChange={(e) => onChange({ valorCobertura: maskMoeda(e.target.value) })}
+          inputMode="numeric"
         />
       )}
 
-      {grupo === "vida" && (
+      {data.tipoSeguro === "VIDA_EMPRESARIAL" && (
         <Field
-          label={data.tipoSeguro === "VIDA_EMPRESARIAL" ? "Número de vidas na empresa" : "Número de dependentes"}
+          label="Número de vidas na empresa"
           name="numeroDependentes"
           type="number"
           min={0}
@@ -105,11 +117,41 @@ export function StepTipoSeguro({ data, onChange }: Props) {
         />
       )}
 
-      {grupo === "outros" && (
+      {data.tipoSeguro === "RC_PROFISSIONAL" && (
+        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
+          <Field
+            label="Qual a sua profissão?"
+            name="profissao"
+            placeholder="Ex.: médico, advogado, engenheiro"
+            value={data.profissao}
+            onChange={(e) => onChange({ profissao: e.target.value })}
+          />
+          <Field
+            label="Valor de risco (opcional)"
+            name="valorRisco"
+            placeholder="R$ 0,00"
+            value={data.valorRisco}
+            onChange={(e) => onChange({ valorRisco: maskMoeda(e.target.value) })}
+            inputMode="numeric"
+          />
+        </div>
+      )}
+
+      {data.tipoSeguro === "EVENTOS" && (
+        <Textarea
+          label="Conte mais sobre o evento (opcional)"
+          name="observacoes"
+          placeholder="Ex.: tipo de evento, data, local e número de convidados"
+          value={data.observacoes}
+          onChange={(e) => onChange({ observacoes: e.target.value })}
+        />
+      )}
+
+      {(data.tipoSeguro === "EMPRESARIAL" || data.tipoSeguro === "RESPONSABILIDADE_CIVIL") && (
         <Textarea
           label="Conte um pouco mais sobre o que você precisa (opcional)"
           name="observacoes"
-          placeholder="Ex.: tamanho do imóvel, tipo de evento, atividade da empresa..."
+          placeholder="Ex.: atividade da empresa, bens a proteger..."
           value={data.observacoes}
           onChange={(e) => onChange({ observacoes: e.target.value })}
         />
