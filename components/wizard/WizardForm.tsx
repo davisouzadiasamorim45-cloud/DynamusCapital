@@ -150,19 +150,14 @@ export function WizardForm({ initialTipo }: { initialTipo?: TipoSeguro } = {}) {
             onClick={() => setStep((s) => Math.max(0, s - 1))}
             className="text-sm text-slate-400 transition hover:text-slate-700"
           >
-            ← Voltar
+            Voltar
           </button>
         ) : (
           <span />
         )}
         {step < 3 ? (
-          <Button
-            onClick={() => setStep((s) => s + 1)}
-            disabled={!canContinue()}
-            className="group gap-2 rounded-full px-8"
-          >
+          <Button onClick={() => setStep((s) => s + 1)} disabled={!canContinue()} className="rounded-full px-8">
             Continuar
-            <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
           </Button>
         ) : (
           <Button onClick={handleSubmit} disabled={!canContinue() || submitting} className="rounded-full px-8">

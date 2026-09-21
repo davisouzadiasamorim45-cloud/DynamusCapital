@@ -62,23 +62,36 @@ export function StepIdentificacao({ data, onChange }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div role="group" aria-label="Tipo de pessoa" className="flex gap-2 sm:gap-2.5">
-        {TIPOS.map((tipo) => (
-          <button
-            key={tipo.value}
-            type="button"
-            aria-pressed={data.tipoPessoa === tipo.value}
-            onClick={() => handleTipoChange(tipo.value)}
-            className={clsx(
-              "rounded-full border px-4 py-1.5 text-sm font-medium transition sm:py-2",
-              data.tipoPessoa === tipo.value
-                ? "border-navy-900 bg-navy-900 text-white"
-                : "border-slate-200 text-slate-600 hover:border-slate-400"
-            )}
-          >
-            {tipo.label}
-          </button>
-        ))}
+      <div
+        role="group"
+        aria-label="Tipo de pessoa"
+        className="relative grid w-fit grid-cols-2 rounded-full bg-slate-100 p-1 shadow-[inset_0_2px_5px_rgba(15,23,42,0.14)]"
+      >
+        {/* Indicador que desliza entre as duas opções (largura = uma coluna, descontado o padding da trilha) */}
+        <span
+          aria-hidden
+          className={clsx(
+            "absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-navy-900 shadow-md transition-transform duration-300 ease-out motion-reduce:transition-none",
+            isPJ && "translate-x-full"
+          )}
+        />
+        {TIPOS.map((tipo) => {
+          const active = data.tipoPessoa === tipo.value;
+          return (
+            <button
+              key={tipo.value}
+              type="button"
+              aria-pressed={active}
+              onClick={() => handleTipoChange(tipo.value)}
+              className={clsx(
+                "relative z-10 rounded-full px-5 py-1.5 text-sm font-medium transition-colors duration-300 sm:px-6 sm:py-2",
+                active ? "text-white" : "text-slate-500 hover:text-slate-800"
+              )}
+            >
+              {tipo.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">

@@ -108,10 +108,9 @@ export default function LandingPage() {
           </p>
           <Link
             href="/cotacao"
-            className="mt-9 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-black/10 backdrop-blur-md transition hover:border-white/50 hover:bg-white/20"
+            className="mt-9 inline-flex items-center rounded-full border border-white/30 bg-white/10 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-black/10 backdrop-blur-md transition hover:border-white/50 hover:bg-white/20"
           >
             Solicitar cotação gratuita
-            <span aria-hidden>→</span>
           </Link>
         </div>
       </section>
@@ -175,10 +174,9 @@ export default function LandingPage() {
           </p>
           <Link
             href="/cotacao"
-            className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-black/10 backdrop-blur-md transition hover:border-white/50 hover:bg-white/20"
+            className="mt-8 inline-flex items-center rounded-full border border-white/30 bg-white/10 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-black/10 backdrop-blur-md transition hover:border-white/50 hover:bg-white/20"
           >
             Solicitar cotação gratuita
-            <span aria-hidden>→</span>
           </Link>
         </div>
       </section>
