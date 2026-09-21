@@ -13,6 +13,8 @@ class Settings(BaseSettings):
 
     cpf_lookup_url: str | None = None
     cpf_lookup_api_key: str | None = None
+    # CNPJ funciona sem contratar nada (BrasilAPI); só troque se quiser outro provedor
+    cnpj_lookup_url: str = "https://brasilapi.com.br/api/cnpj/v1"
     placa_lookup_url: str | None = None
     placa_lookup_api_key: str | None = None
 

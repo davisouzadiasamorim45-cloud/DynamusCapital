@@ -92,3 +92,26 @@ async def lookup_cpf(cpf: str):
         "nome": data.get("nome", ""),
         "data_nascimento": data.get("data_nascimento", ""),
     }
+
+
+@router.get("/cnpj/{cnpj}")
+async def lookup_cnpj(cnpj: str):
+    digits = "".join(ch for ch in cnpj if ch.isdigit())
+    if len(digits) != 14:
+        raise HTTPException(status_code=422, detail="CNPJ deve conter 14 dígitos")
+
+    # BrasilAPI: gratuita e sem chave (dados públicos da Receita Federal).
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.get(f"{settings.cnpj_lookup_url}/{digits}")
+
+    if resp.status_code == 404:
+        raise HTTPException(status_code=404, detail="CNPJ não encontrado")
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail="Falha ao consultar CNPJ")
+
+    data = resp.json()
+    return {
+        "cnpj": digits,
+        "nome": data.get("razao_social", ""),
+        "data_abertura": data.get("data_inicio_atividade", ""),
+    }

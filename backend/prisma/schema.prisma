@@ -11,21 +11,32 @@ datasource db {
 
 model Lead {
   id                String     @id @default(cuid())
-  cpf               String
+  tipoPessoa        TipoPessoa @default(PF)
+  // CPF (PF) ou CNPJ (PJ), só dígitos
+  documento         String
+  // Nome completo (PF) ou razão social (PJ)
   nome              String
+  // Data de nascimento (PF) ou de abertura da empresa (PJ)
   dataNascimento    String
   tipoSeguro        TipoSeguro
   placa             String?
   modeloVeiculo     String?
   anoVeiculo        String?
+  // Vida em Grupo: número de vidas na empresa
   numeroDependentes Int?
-  valorCarga        String?
+  // Vida e Residencial
+  valorCobertura    String?
+  // RC Profissional
+  profissao         String?
+  valorRisco        String?
   observacoes       String?
   cep               String
   rua               String
   numero            String
   complemento       String?
   bairro            String
+  cidade            String
+  uf                String
   email             String
   celular           String
   status            StatusLead @default(NOVO)
@@ -36,6 +47,7 @@ model Lead {
   @@index([status])
   @@index([tipoSeguro])
   @@index([createdAt])
+  @@index([documento])
 }
 
 enum TipoSeguro {
@@ -44,12 +56,16 @@ enum TipoSeguro {
   VEICULAR
   MOTO
   CAMINHAO
-  CARGA
   EMPRESARIAL
   RESPONSABILIDADE_CIVIL
   RC_PROFISSIONAL
   RESIDENCIAL
   EVENTOS
+}
+
+enum TipoPessoa {
+  PF
+  PJ
 }
 
 enum StatusLead {

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.database import db
 from app.dependencies import get_current_admin
-from app.schemas.lead import TIPOS_VEICULO, TIPOS_VIDA, LeadCreate, LeadOut, LeadStatusUpdate
+from app.schemas.lead import TIPOS_COBERTURA, TIPOS_VEICULO, LeadCreate, LeadOut, LeadStatusUpdate, only_digits
 
 router = APIRouter()
 
@@ -14,8 +14,12 @@ router = APIRouter()
 async def create_lead(payload: LeadCreate):
     if payload.tipoSeguro in TIPOS_VEICULO and not payload.placa:
         raise HTTPException(status_code=422, detail="placa é obrigatória para esse tipo de seguro")
-    if payload.tipoSeguro in TIPOS_VIDA and payload.numeroDependentes is None:
+    if payload.tipoSeguro == "VIDA_EMPRESARIAL" and payload.numeroDependentes is None:
         raise HTTPException(status_code=422, detail="numeroDependentes é obrigatório para esse tipo de seguro")
+    if payload.tipoSeguro in TIPOS_COBERTURA and not payload.valorCobertura:
+        raise HTTPException(status_code=422, detail="valorCobertura é obrigatório para esse tipo de seguro")
+    if payload.tipoSeguro == "RC_PROFISSIONAL" and not (payload.profissao and payload.profissao.strip()):
+        raise HTTPException(status_code=422, detail="profissao é obrigatória para esse tipo de seguro")
 
     lead = await db.lead.create(data=payload.model_dump())
     return lead
@@ -37,7 +41,7 @@ async def list_leads(
     if tipo_seguro:
         where["tipoSeguro"] = tipo_seguro.upper()
     if cidade:
-        where["bairro"] = {"contains": cidade, "mode": "insensitive"}
+        where["cidade"] = {"contains": cidade, "mode": "insensitive"}
     if data_inicio or data_fim:
         created: dict = {}
         if data_inicio:
@@ -46,10 +50,11 @@ async def list_leads(
             created["lte"] = data_fim
         where["createdAt"] = created
     if busca:
-        where["OR"] = [
-            {"nome": {"contains": busca, "mode": "insensitive"}},
-            {"cpf": {"contains": busca}},
-        ]
+        where["OR"] = [{"nome": {"contains": busca, "mode": "insensitive"}}]
+        # documento é gravado só com dígitos; a busca ignora pontos, traço e barra
+        busca_digitos = only_digits(busca)
+        if busca_digitos:
+            where["OR"].append({"documento": {"contains": busca_digitos}})
 
     leads = await db.lead.find_many(where=where, order={"createdAt": "desc"})
     return leads
