@@ -84,6 +84,30 @@ O `render.yaml` na raiz cria o Postgres (`dynamus-db`) e a API (`dynamus-api`) d
 > e `prisma py fetch` no build. Confirme também que o **Start Command** no painel do Render
 > não foi editado à mão: ele deve ser apenas `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
 
+### Sem Shell ou Pre-Deploy Command (planos que travam esses recursos)
+
+Se o painel mostrar cadeado no **Pre-Deploy Command** e raio no **Shell**, use o
+**Start Command** como via de execução:
+
+- **Criar ou redefinir o admin:** defina `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` e
+  `SEED_ADMIN_NOME` no Environment e troque o Start Command temporariamente para
+
+  ```bash
+  (python -m app.seed || true) && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+  ```
+
+  Nos Logs aparece `Admin <email> criado`/`atualizado` e a lista de admins do banco.
+  Depois volte o Start Command para só o `uvicorn`. O seed é idempotente: rodando de novo,
+  ele sincroniza a senha com `SEED_ADMIN_PASSWORD`.
+
+- **Aplicar mudanças de schema:** sem pre-deploy, prefixe o Start Command com
+
+  ```bash
+  prisma db push --schema=prisma/schema.prisma --skip-generate && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+  ```
+
+  Deixe assim só no deploy que mexe no `schema.prisma`; manter fixo atrasa cada restart.
+
 ## Provedores de lookup (CPF, CNPJ e Placa)
 
 `/lookup/cep` (ViaCEP) e `/lookup/cnpj` (BrasilAPI, dados públicos da Receita) já funcionam
