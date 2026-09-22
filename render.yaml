@@ -20,7 +20,9 @@ services:
     # formulário ficaria ~1 min travado na primeira requisição.
     plan: starter
     rootDir: backend
-    buildCommand: pip install -r requirements.txt && prisma generate --schema=prisma/schema.prisma
+    # prisma py fetch baixa o query engine para PRISMA_BINARY_CACHE_DIR (dentro do repo,
+    # que é o único diretório que sobrevive do build para o runtime no Render).
+    buildCommand: pip install -r requirements.txt && prisma py fetch && prisma generate --schema=prisma/schema.prisma
     # Cria/atualiza as tabelas a cada deploy. Sem --accept-data-loss: mudanças destrutivas falham em vez de apagar dados.
     preDeployCommand: prisma db push --schema=prisma/schema.prisma --skip-generate
     # Baixa os binários do Prisma na subida: o cache do build não chega ao ambiente de execução.
@@ -29,6 +31,10 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.10
+      # Sem isto o engine vai para /opt/render/.cache, que o runtime não enxerga
+      # (BinaryNotFoundError no startup).
+      - key: PRISMA_BINARY_CACHE_DIR
+        value: /opt/render/project/src/backend/.prisma-binaries
       - key: DATABASE_URL
         fromDatabase:
           name: dynamus-db
