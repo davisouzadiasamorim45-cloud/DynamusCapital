@@ -20,9 +20,12 @@ export function SummaryCards({ leads }: { leads: Lead[] }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       {cards.map((card) => (
-        <div key={card.label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">{card.label}</p>
-          <p className="mt-1 text-3xl font-bold text-slate-900">{card.value}</p>
+        <div
+          key={card.label}
+          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-navy-800 dark:bg-navy-900"
+        >
+          <p className="text-sm text-slate-500 dark:text-slate-400">{card.label}</p>
+          <p className="mt-1 text-3xl font-bold text-slate-900 dark:text-white">{card.value}</p>
         </div>
       ))}
     </div>

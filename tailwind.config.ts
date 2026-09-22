@@ -1,6 +1,9 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  // O tema escuro do painel admin é ativado pela classe "dark" no wrapper do AdminShell,
+  // sem afetar o site público.
+  darkMode: "class",
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
