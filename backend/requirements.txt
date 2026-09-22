@@ -5,5 +5,7 @@ pydantic[email]>=2.9.0
 pydantic-settings>=2.6.0
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
+# passlib 1.7.4 le bcrypt.__about__, removido no bcrypt 5 (AttributeError nos logs).
+bcrypt>=4.0,<5
 httpx>=0.27.0
 python-dotenv>=1.0.1
