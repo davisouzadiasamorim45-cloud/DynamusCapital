@@ -1,14 +1,16 @@
-# Blueprint do Render: Postgres + API FastAPI (ver "Deploy no Render" no README).
-# O front (Next.js) não está aqui; ele aponta para esta API via NEXT_PUBLIC_API_URL.
+# VERSÃO DE DEMONSTRAÇÃO (planos gratuitos do Render). NÃO usar em produção.
+# Limites do plano gratuito:
+#   - a API desliga após 15 min sem acesso e leva ~1 min para voltar (o formulário fica travado na 1ª requisição);
+#   - o banco expira 30 dias após a criação (+14 dias de carência, depois é apagado).
+# Para produção use o render.yaml da branch main (planos pagos).
 
 databases:
   - name: dynamus-db
     databaseName: dynamus_capital
     user: dynamus
     region: virginia
-    # Confira o nome do plano no painel do Render (planos de banco são renomeados de tempos em tempos).
-    plan: basic-256mb
-    # Lista vazia = só a API (rede interna do Render) acessa o banco; nada exposto à internet.
+    plan: free
+    # Lista vazia = só a API (rede interna do Render) acessa o banco.
     ipAllowList: []
 
 services:
@@ -16,14 +18,14 @@ services:
     name: dynamus-api
     runtime: python
     region: virginia
-    # Starter fica sempre ligado. O plano free desliga após 15 min sem acesso e o
-    # formulário ficaria ~1 min travado na primeira requisição.
-    plan: starter
+    plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt && prisma generate --schema=prisma/schema.prisma
-    # Cria/atualiza as tabelas a cada deploy. Sem --accept-data-loss: mudanças destrutivas falham em vez de apagar dados.
-    preDeployCommand: prisma db push --schema=prisma/schema.prisma --skip-generate
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    # O plano gratuito não tem preDeployCommand nem Shell. Por isso, a cada subida:
+    #   1. cria/atualiza as tabelas (sem --accept-data-loss);
+    #   2. cria o admin a partir das variáveis SEED_* (se já existir, só avisa e segue);
+    #   3. inicia a API.
+    startCommand: prisma db push --schema=prisma/schema.prisma --skip-generate && (python -m app.seed || true) && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
@@ -34,8 +36,13 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
-      # Domínio(s) do site, separados por vírgula. Ex.: https://www.dynamuscapital.com.br
+      # Para demo local use http://localhost:3000. Vários domínios: separe por vírgula.
       - key: CORS_ORIGINS
         sync: false
-      # Provedores de CPF e placa: adicione CPF_LOOKUP_URL/CPF_LOOKUP_API_KEY e
-      # PLACA_LOOKUP_URL/PLACA_LOOKUP_API_KEY no painel quando o cliente contratar.
+      - key: SEED_ADMIN_EMAIL
+        value: admin@dynamuscapital.com.br
+      - key: SEED_ADMIN_NOME
+        value: Administrador
+      # Senha do admin de demonstração (o Render pede o valor ao criar o Blueprint).
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
