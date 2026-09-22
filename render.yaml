@@ -23,7 +23,8 @@ services:
     buildCommand: pip install -r requirements.txt && prisma generate --schema=prisma/schema.prisma
     # Cria/atualiza as tabelas a cada deploy. Sem --accept-data-loss: mudanças destrutivas falham em vez de apagar dados.
     preDeployCommand: prisma db push --schema=prisma/schema.prisma --skip-generate
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    # Baixa os binários do Prisma na subida: o cache do build não chega ao ambiente de execução.
+    startCommand: prisma py fetch && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
