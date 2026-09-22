@@ -22,10 +22,11 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt && prisma generate --schema=prisma/schema.prisma
     # O plano gratuito não tem preDeployCommand nem Shell. Por isso, a cada subida:
-    #   1. cria/atualiza as tabelas (sem --accept-data-loss);
-    #   2. cria o admin a partir das variáveis SEED_* (se já existir, só avisa e segue);
-    #   3. inicia a API.
-    startCommand: prisma db push --schema=prisma/schema.prisma --skip-generate && (python -m app.seed || true) && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    #   1. baixa os binários do Prisma (o cache do build não chega ao ambiente de execução);
+    #   2. cria/atualiza as tabelas (sem --accept-data-loss);
+    #   3. cria o admin a partir das variáveis SEED_* (se já existir, só avisa e segue);
+    #   4. inicia a API.
+    startCommand: prisma py fetch && prisma db push --schema=prisma/schema.prisma --skip-generate && (python -m app.seed || true) && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
