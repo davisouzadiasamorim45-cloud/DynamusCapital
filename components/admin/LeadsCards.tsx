@@ -5,19 +5,19 @@ import { whatsappUrl } from "@/lib/contact";
 import { maskCelular } from "@/lib/masks";
 import { IconChat, IconMail, IconPhone, IconPin } from "@/components/ui/icons";
 import { StatusSelect } from "./StatusSelect";
+import { EmptyLeads } from "./EmptyLeads";
 
 interface Props {
   leads: Lead[];
   onStatusChange: (id: string, status: StatusLead) => void;
+  filtrado?: boolean;
 }
 
 const row = "flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300";
 const rowIcon = "mt-0.5 h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500";
 
-export function LeadsCards({ leads, onStatusChange }: Props) {
-  if (leads.length === 0) {
-    return <p className="py-10 text-center text-slate-500 dark:text-slate-400">Nenhum lead encontrado.</p>;
-  }
+export function LeadsCards({ leads, onStatusChange, filtrado }: Props) {
+  if (leads.length === 0) return <EmptyLeads filtrado={filtrado} />;
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -67,7 +67,7 @@ export function LeadsCards({ leads, onStatusChange }: Props) {
               href={whatsappUrl(lead)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
             >
               <IconChat className="h-4 w-4" />
               WhatsApp

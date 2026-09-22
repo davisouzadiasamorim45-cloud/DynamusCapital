@@ -13,6 +13,17 @@ export const STATUS_COLORS: Record<StatusLead, string> = {
   PERDIDO: "#ef4444",
 };
 
+// Dias corridos desde a data, arredondado para baixo.
+export function daysSince(iso: string): number {
+  return Math.floor((Date.now() - new Date(iso).getTime()) / DAY);
+}
+
+// Leads que chegaram e continuam sem contato. E o unico numero que muda o que o
+// corretor faz agora, entao ele aparece no topo da tela de leads.
+export function aguardandoHa(leads: Lead[], dias: number): Lead[] {
+  return leads.filter((l) => l.status === "NOVO" && daysSince(l.createdAt) >= dias);
+}
+
 export function pct(part: number, total: number): number {
   return total === 0 ? 0 : Math.round((part / total) * 100);
 }

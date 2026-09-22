@@ -1,9 +1,11 @@
+// Paleta de status alinhada à marca: dourado marca o desfecho valioso (convertido)
+// e "perdido" é cinza, não vermelho — negócio encerrado não é erro.
 export const STATUS_STYLES: Record<string, string> = {
-  NOVO: "bg-navy-100 text-navy-700 dark:bg-slate-500/20 dark:text-slate-300",
-  CONTATADO: "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300",
-  COTACAO_ENVIADA: "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300",
-  CONVERTIDO: "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300",
-  PERDIDO: "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300",
+  NOVO: "bg-navy-100 text-navy-800 dark:bg-navy-700/60 dark:text-navy-100",
+  CONTATADO: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300",
+  COTACAO_ENVIADA: "bg-violet-100 text-violet-800 dark:bg-violet-500/15 dark:text-violet-300",
+  CONVERTIDO: "bg-gold-100 text-gold-700 dark:bg-gold-400/20 dark:text-gold-200",
+  PERDIDO: "bg-slate-200 text-slate-600 dark:bg-navy-800 dark:text-slate-400",
 };
 
 export const STATUS_LABELS: Record<string, string> = {

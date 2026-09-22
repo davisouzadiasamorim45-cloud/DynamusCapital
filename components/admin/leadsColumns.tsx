@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { formatDocumentoLead, formatSeguroDetalhe, TIPO_SEGURO_LABELS, type Lead } from "@/lib/types";
 import { whatsappUrl } from "@/lib/contact";
+import { daysSince } from "@/lib/adminStats";
 import { maskCelular, maskCep } from "@/lib/masks";
 import { IconChat } from "@/components/ui/icons";
 
@@ -17,6 +18,15 @@ const muted = "text-xs text-slate-400 dark:text-slate-500";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("pt-BR");
+}
+
+// "ha 3 dias" diz mais que "22/09/2026": o que importa e quanto tempo o lead esperou.
+function formatIdade(iso: string): string {
+  const dias = daysSince(iso);
+  if (dias <= 0) return "hoje";
+  if (dias === 1) return "ontem";
+  if (dias < 30) return `há ${dias} dias`;
+  return formatDate(iso);
 }
 
 // A coluna "status" é renderizada pela própria tabela (precisa do handler de troca).
@@ -87,7 +97,7 @@ export const LEAD_COLUMNS: LeadColumn[] = [
         target="_blank"
         rel="noopener noreferrer"
         title="Abrir conversa no WhatsApp"
-        className="inline-flex items-center gap-1.5 whitespace-nowrap font-medium text-green-700 hover:underline dark:text-green-400"
+        className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-emerald-50 px-2 py-1 font-medium text-emerald-700 transition hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
       >
         <IconChat className="h-4 w-4 shrink-0" />
         {maskCelular(l.celular)}
@@ -105,8 +115,28 @@ export const LEAD_COLUMNS: LeadColumn[] = [
     ),
   },
   { id: "origem", label: "Origem", defaultVisible: false, render: (l) => l.origem ?? "—" },
-  { id: "recebido", label: "Recebido em", defaultVisible: true, render: (l) => formatDate(l.createdAt) },
-  { id: "atualizado", label: "Atualizado em", defaultVisible: false, render: (l) => formatDate(l.updatedAt) },
+  {
+    id: "recebido",
+    label: "Recebido",
+    defaultVisible: true,
+    render: (l) => {
+      // Lead novo parado ha 2 dias ou mais: o unico alerta da tabela.
+      const parado = l.status === "NOVO" && daysSince(l.createdAt) >= 2;
+      return (
+        <span
+          title={formatDate(l.createdAt)}
+          className={
+            parado
+              ? "whitespace-nowrap font-medium text-amber-700 dark:text-amber-400"
+              : "whitespace-nowrap text-slate-500 dark:text-slate-400"
+          }
+        >
+          {formatIdade(l.createdAt)}
+        </span>
+      );
+    },
+  },
+  { id: "atualizado", label: "Atualizado", defaultVisible: false, render: (l) => formatDate(l.updatedAt) },
   { id: "status", label: "Status", defaultVisible: true, render: () => null },
 ];
 
